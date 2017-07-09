@@ -35,54 +35,66 @@ public class Shape {
 	}
 	
 	Shape(Shape shape){
-		this.coordinates = shape.coordinates;
-		this.color = shape.color;
-		this.id = shape.id;
-		this.tetris = shape.tetris;
-		
-		x = 5;
-		y = 0;
-		time = 0;
-		timeOffset = System.currentTimeMillis();
-		collide = false;
-		offset = 0;
-		rotate = false;
-		speedUp = 450;
+		this(shape.coordinates, shape.color, shape.id, shape.tetris);
 	}
 	
 	public void update() {
-		
-		time += System.currentTimeMillis() - timeOffset;
-		timeOffset = System.currentTimeMillis();
-		
-		if(collide)
+
+		if(collide){
 			fixToBoard();
-		
-		if(rotate){
-			coordinates = transposeMatrix(coordinates);
-			rotate = false;
+			return;
 		}
 		
-		if(!(x + offset == 0 || x + offset == Tetris.sizeY - coordinates[0].length))
-			x += offset;
-		
+		rotate();
+		moveX();
+		moveY();
+		checkCollide();
+	}
+	
+	private void moveY(){
+		time += System.currentTimeMillis() - timeOffset;
+		timeOffset = System.currentTimeMillis();
 		speed = speedUp;
+		
 		if(time > speed) {
-			if(y+1 != Tetris.sizeX-coordinates.length)
+			if(y+1 != Tetris.sizeY-coordinates.length)
 				y ++;
 			else 
 				collide = true;
+			
 			time = 0;
 		}
+	}
+
+	private void moveX(){		// should I get a new reference to getBoard instead of having multiple ones?
+
+		if(tetris.getBoard()[y][x + offset] == 0 && tetris.getBoard()[y][x + coordinates[0].length + offset - 1] == 0){		
+			for(int row = 0; row < coordinates.length; row++)
+				for(int col = 0; col < coordinates[0].length; col++)
+					if(coordinates[row][col] == 1)
+						if(tetris.getBoard()[y + row][x + col + offset] != 0)
+							return;	
+			x += offset;
+		}
 		
+		offset = 0;
+	}
+	
+	private void rotate(){
+		if(rotate){
+			if(x + transposeMatrix(coordinates)[0].length < Tetris.sizeX && y + transposeMatrix(coordinates).length < Tetris.sizeY)
+				coordinates = transposeMatrix(coordinates);
+			rotate = false;
+		}
+	}
+	
+	private void checkCollide(){
 		for(int row = 0; row<coordinates.length; row++)
 			for(int col=0; col<coordinates[row].length; col++) {
 				if(coordinates[row][col] != 0 &&
-					tetris.board[row + y + 1][col + x] != 0) 
+					tetris.getBoard()[row + y + 1][col + x] != 0) 
 					collide = true;	
 			}
-		
-		offset = 0;
 	}
 	
 	public void fixToBoard() {
@@ -90,9 +102,8 @@ public class Shape {
 			for(int col=0; col<coordinates[row].length; col++) 
 					if(coordinates[row][col] != 0) {
 						if(row + y == 1) tetris.gameOver();
-						tetris.board[row + y][col+x] = id;
+						tetris.getBoard()[row + y][col+x] = id;
 						tetris.newShape();
-					//	System.out.println("Fixed well");
 			}		
 			
 		tetris.clearRows();
@@ -106,7 +117,6 @@ public class Shape {
 					graphics.setColor(color);
 					graphics.fillRect(col*tetris.getBoxSize() + x*tetris.getBoxSize(), row*tetris.getBoxSize() + y*tetris.getBoxSize(),
 										tetris.getBoxSize(), tetris.getBoxSize());
-					//System.out.println(col*tetris.getBoxSize() + x*tetris.getBoxSize());
 					graphics.setColor(Color.BLACK);
 				}
 	}

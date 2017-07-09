@@ -9,7 +9,7 @@ public class Main {
 		JFrame window = new JFrame();
 		Tetris tetris = new Tetris();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setSize(12*tetris.getBoxSize() + 15, 18*tetris.getBoxSize() + tetris.getBoxSize()/2);
+		window.setSize(Tetris.sizeX*tetris.getBoxSize() + 15, Tetris.sizeY*tetris.getBoxSize() + tetris.getBoxSize()/2);
 		
 		window.add(tetris);
 		window.addKeyListener(tetris);	

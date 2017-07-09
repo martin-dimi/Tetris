@@ -16,29 +16,24 @@ import javax.swing.Timer;
 
 public class Tetris extends JPanel implements KeyListener{
 	
-
 	private static final long serialVersionUID = 1L;
-	public static int sizeX, sizeY;
-	public int[][] board;
-	private Shape[] shapes;
-	private int boxSize = 55;
+	public static final int sizeX = 16, sizeY = 22;	// kude da initialise-vam
+	private int[][] board;
+	private final int boxSize = 30;
+	private final Shape[] shapes;
+	private final Map<Integer, Color> colours;
 	private Shape currShape;
-	private Timer timer;
-	private Random random;
-	private int score;
-	public static Map<Integer, Color> colours;
-	private int diagram = 0;
+	private final Timer timer;
+	private final Random random;
+	private int score = 0;
 	
 	Tetris(){
-				
-		sizeX = 18;
-		sizeY = 12;
-		board = new int[sizeX][sizeY];
-		for(int i = 0; i<sizeX; i++)
-			for(int j = 0; j<sizeY; j++)
-				board[i][j] = (j == 0 || j == sizeY-1 || i == sizeX-1) ? 7 : 0;
+			
+		board = new int[sizeY][sizeX];
+		for(int row = 0; row<sizeY; row++)
+			for(int col = 0; col<sizeX; col++)
+				board[row][col] = (col == 0 || col == sizeX-1 || row == sizeY-1) ? 7 : 0;
 		
-		shapes = new Shape[7];
 		colours = new HashMap<>();
 		colours.put(1, Color.CYAN);
 		colours.put(2, Color.green);
@@ -48,6 +43,7 @@ public class Tetris extends JPanel implements KeyListener{
 		colours.put(6, Color.YELLOW);
 		colours.put(7, Color.GRAY);
 		
+		shapes = new Shape[7];
 		shapes[0] = new Shape(new int[][] {
 			{1,1,1,1}
 		}, colours.get(1), 1, this);
@@ -82,19 +78,17 @@ public class Tetris extends JPanel implements KeyListener{
 			{1,1,1}
 		}, colours.get(6), 6, this);
 		
+		random = new Random();
+		currShape = new Shape(shapes[random.nextInt(7)]);
+		
 		timer = new Timer(1000/60, new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
-				update();
+				currShape.update();
 				repaint();
 			}
 		});
-		
 		timer.start();
 		
-		random = new Random();
-		currShape = new Shape(shapes[random.nextInt(7)]);
-		score = 0;
 		
 	}
 	
@@ -104,19 +98,17 @@ public class Tetris extends JPanel implements KeyListener{
 		super.paintComponent(graphics);
 		currShape.render(graphics);
 		
-		// draw diagram
-		
-		if(diagram == 1){
+		// draw diagram	
+		/*
 		for(int i=0; i<sizeX; i++) 
 			graphics.drawLine(0, i*boxSize, board[i].length*boxSize, i*boxSize);
 			
 		for(int i=0; i<sizeY; i++)
 			graphics.drawLine(i*boxSize, 0, i*boxSize, board.length*boxSize);
-		}
+		*/
 		
-		
-		for(int i=0; i<sizeX; i++)
-			for(int j=0; j<sizeY; j++)
+		for(int i=0; i<sizeY; i++)
+			for(int j=0; j<sizeX; j++)
 				if(board[i][j] != 0){
 					graphics.setColor(colours.get(board[i][j]));
 					graphics.fillRect(j*boxSize, i*boxSize, boxSize, boxSize);
@@ -129,37 +121,28 @@ public class Tetris extends JPanel implements KeyListener{
 	
 	}
 	
-	public int getBoxSize() {
-		return boxSize;
-	}
-	
-	private void update() {
-		currShape.update();
-	}
-	
 	public void newShape() {
 		currShape = new Shape(shapes[random.nextInt(7)]);
-		//currShape = new Shape(shapes[3]);
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_LEFT)
+		if(e.getKeyCode() == KeyEvent.VK_A)
 			currShape.setOffset(-1);
 		
-		if(e.getKeyCode() == KeyEvent.VK_RIGHT)
+		if(e.getKeyCode() == KeyEvent.VK_D)
 			currShape.setOffset(1);
 		
-		if(e.getKeyCode() == KeyEvent.VK_UP)
+		if(e.getKeyCode() == KeyEvent.VK_W)
 			currShape.setRotate(true);
 		
-		if(e.getKeyCode() == KeyEvent.VK_DOWN)
+		if(e.getKeyCode() == KeyEvent.VK_S)
 			currShape.setSpeed(80);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_DOWN)
+		if(e.getKeyCode() == KeyEvent.VK_S)
 			currShape.setSpeed(450);
 	}
 	
@@ -168,20 +151,19 @@ public class Tetris extends JPanel implements KeyListener{
 		
 	}
 
-
 	public void gameOver() {
 		System.exit(0);
 	}
+	
 	public void clearRows() {
 		
-		//System.out.println("clearRows");
-		
-		for(int row = 0; row < sizeX - 1; row++) {
+		for(int row = 0; row < sizeY - 1; row++) {
 			boolean full = true;
-			for(int col = 1; col < sizeY - 1; col++) 
-				if(board[row][col] == 0) {
+			
+			for(int col = 1; col < sizeX - 1; col++) 
+				if(board[row][col] == 0)
 					full = false;
-			}
+			
 			if(full) {
 				score += 100;
 				pushDown(row);
@@ -189,12 +171,16 @@ public class Tetris extends JPanel implements KeyListener{
 		}
 	}
 
-
 	private void pushDown(int row) {
-		for(; row>0; row--) {
+		for(; row>0; row--)
 			board[row] = board[row-1];
-		}
-		
 	}
-	
+		
+	public int getBoxSize() {
+		return boxSize;
+	}
+
+	public int[][] getBoard(){
+		return board;
+	}
 }
