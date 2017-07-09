@@ -14,6 +14,8 @@ public class Main {
 		window.add(tetris);
 		window.addKeyListener(tetris);	
 		window.setVisible(true);
+		
+		tetris.run();
 
 	}
 	

@@ -22,8 +22,9 @@ public class Tetris extends JPanel implements KeyListener{
 	private final int boxSize = 30;
 	private final Shape[] shapes;
 	private final Map<Integer, Color> colours;
+	//private final Timer timer;
 	private Shape currShape;
-	private final Timer timer;
+
 	private final Random random;
 	private int score = 0;
 	
@@ -78,9 +79,7 @@ public class Tetris extends JPanel implements KeyListener{
 			{1,1,1}
 		}, colours.get(6), 6, this);
 		
-		random = new Random();
-		currShape = new Shape(shapes[random.nextInt(7)]);
-		
+		/*
 		timer = new Timer(1000/60, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				currShape.update();
@@ -88,8 +87,18 @@ public class Tetris extends JPanel implements KeyListener{
 			}
 		});
 		timer.start();
+		*/
 		
-		
+		random = new Random();
+		currShape = new Shape(shapes[random.nextInt(7)]);
+
+	}
+	
+	public void run(){
+		while(true){
+			currShape.update();
+			repaint();
+		}
 	}
 	
 	@Override 
@@ -129,6 +138,7 @@ public class Tetris extends JPanel implements KeyListener{
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_A)
 			currShape.setOffset(-1);
+
 		
 		if(e.getKeyCode() == KeyEvent.VK_D)
 			currShape.setOffset(1);
